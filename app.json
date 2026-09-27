@@ -6,19 +6,48 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "description": "Stay prepared for flood and haze in Singapore. Live risk information, preparedness guidance and emergency contacts in one place.",
+    "primaryColor": "#1f3f66",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.zengyeee.readysg",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "ReadySG uses your location to show which hospitals, clinics and community centres are nearest to you."
+      }
     },
     "android": {
+      "package": "com.zengyeee.readysg",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
+      ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-asset",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "ReadySG uses your location to show which support locations are nearest to you."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#1f3f66"
+        }
+      ]
+    ]
   }
 }
