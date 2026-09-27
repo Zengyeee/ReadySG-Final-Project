@@ -1,15 +1,10 @@
 import * as Location from 'expo-location';
 import { Platform } from 'react-native';
 
-// Wraps expo-location so screens do not have to deal with permission
-// states themselves. Every function returns a plain object describing what
-// happened rather than throwing, because a denied permission is a normal
-// thing for a user to choose - not an error condition.
-
+// Handles location permission and gets the user's current location.
 export async function getCurrentCoordinates() {
   try {
-    // Web browsers handle geolocation differently and often block it on
-    // non-https origins, so this can legitimately fail during development.
+    // Ask the user for permission to use their location.
     const { status } = await Location.requestForegroundPermissionsAsync();
 
     if (status !== 'granted') {
@@ -21,8 +16,7 @@ export async function getCurrentCoordinates() {
       };
     }
 
-    // Balanced accuracy is plenty for sorting a list of hospitals by
-    // distance, and it returns much faster than high accuracy.
+    // Balanced accuracy is enough for sorting nearby support locations.
     const position = await Location.getCurrentPositionAsync({
       accuracy: Location.Accuracy.Balanced,
     });
@@ -36,6 +30,7 @@ export async function getCurrentCoordinates() {
       message: null,
     };
   } catch (error) {
+    // Show all locations if the user's location cannot be found.
     return {
       coordinates: null,
       status: 'error',

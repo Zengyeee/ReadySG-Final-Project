@@ -6,13 +6,15 @@ import ScreenContainer from '../components/ScreenContainer';
 import { useApp } from '../context/AppContext';
 import { colors, radius, spacing, typography } from '../theme/theme';
 
-// Alert.alert does nothing on web, so destructive actions would appear
-// broken during development. This falls back to the browser's own confirm.
+// Shows a confirmation message before resetting the user's data.
 function confirmAction({ title, message, onConfirm }) {
+  // Use the browser confirmation when running the app on web.
   if (Platform.OS === 'web') {
     if (window.confirm(`${title}\n\n${message}`)) onConfirm();
     return;
   }
+
+  // Use the normal React Native alert on mobile.
   // eslint-disable-next-line global-require
   const { Alert } = require('react-native');
   Alert.alert(title, message, [
@@ -21,6 +23,7 @@ function confirmAction({ title, message, onConfirm }) {
   ]);
 }
 
+// Allows the user to change app settings and reset saved data.
 export default function SettingsScreen({ navigation }) {
   const { settings, updateSettings, resetAllData } = useApp();
 
@@ -68,9 +71,7 @@ export default function SettingsScreen({ navigation }) {
         </View>
       </View>
 
-      {/* Being honest about what the notifications actually do. The app
-          cannot monitor conditions while it is closed, and implying
-          otherwise in an emergency app would be misleading. */}
+      {/* Explain how the risk notifications work. */}
       <View style={styles.noteCard}>
         <Ionicons
           name="information-circle-outline"
@@ -105,6 +106,7 @@ export default function SettingsScreen({ navigation }) {
 
       <Text style={styles.sectionLabel}>DATA</Text>
 
+      {/* Reset all progress and settings stored on the device. */}
       <Pressable
         style={styles.resetButton}
         onPress={handleReset}
@@ -131,6 +133,7 @@ export default function SettingsScreen({ navigation }) {
   );
 }
 
+// Styling for the settings screen.
 const styles = StyleSheet.create({
   sectionLabel: {
     ...typography.label,

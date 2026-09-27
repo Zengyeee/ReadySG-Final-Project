@@ -8,8 +8,7 @@ import {
   toggleItem,
 } from '../../src/utils/progressUtils';
 
-// Small fake checklist so each test stays readable and I only write the
-// item shape out once.
+// Sample checklist items used to test the progress functions.
 const items = [
   { id: 'f1', category: 'Flood', title: 'Flood one', points: 10 },
   { id: 'f2', category: 'Flood', title: 'Flood two', points: 10 },
@@ -26,11 +25,11 @@ describe('calculateProgress', () => {
   test('partial completion rounds correctly', () =>
     expect(calculateProgress(['f1', 'f2'], items)).toBe(40));
 
-  // Without the guard this divides by zero and renders NaN on screen.
+  // Empty checklist should return 0 instead of an invalid result.
   test('an empty item list returns 0 rather than NaN', () =>
     expect(calculateProgress([], [])).toBe(0));
 
-  // Saved ids can outlive the checklist items they belonged to.
+  // Old saved items that are no longer in the checklist should not be counted.
   test('ids that no longer exist do not count', () =>
     expect(calculateProgress(['deleted-item', 'f1'], items)).toBe(20));
 });
@@ -41,6 +40,7 @@ describe('countCompleted', () => {
 });
 
 describe('itemsInCategory', () => {
+  // Check that checklist items can be separated by their category.
   test('filters by category', () =>
     expect(itemsInCategory(items, 'Flood')).toHaveLength(2));
   test('returns an empty array for an unused category', () =>
@@ -62,7 +62,7 @@ describe('categoryProgress', () => {
     expect(result.percentage).toBe(50);
   });
 
-  // Guards against a badge unlocking because a category happens to be empty.
+  // An empty category should not be treated as completed.
   test('an empty category is never complete', () => {
     const result = categoryProgress([], [], 'Flood');
     expect(result.isComplete).toBe(false);
@@ -77,6 +77,7 @@ describe('isCategoryComplete', () => {
 });
 
 describe('isChecklistComplete', () => {
+  // The whole checklist is complete only when all items are completed.
   test('true only when everything is done', () =>
     expect(isChecklistComplete(['f1', 'f2', 'h1', 'h2', 'g1'], items)).toBe(true));
   test('false when one item remains', () =>
@@ -91,7 +92,7 @@ describe('toggleItem', () => {
   test('removes a checked item', () =>
     expect(toggleItem(['f1', 'f2'], 'f1')).toEqual(['f2']));
 
-  // If this mutated the array React would sometimes skip the re-render.
+  // Make sure the original array is not changed when an item is toggled.
   test('does not change the original array', () => {
     const original = ['f1'];
     toggleItem(original, 'f2');

@@ -1,6 +1,4 @@
-// Eight questions covering flood, haze and general emergency knowledge.
-// Each one carries an explanation because the point is learning rather
-// than scoring - a wrong answer should still teach something.
+// Quiz questions used to teach users about flood, haze and emergency safety.
 
 export const quizQuestions = [
   {

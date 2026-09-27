@@ -3,12 +3,7 @@ import { View, Text, ScrollView, RefreshControl, StyleSheet } from 'react-native
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, spacing, typography, maxContentWidth } from '../theme/theme';
 
-// Every screen needs the same safe-area handling, padding and maximum
-// width, so rather than repeating that in eight places this wrapper does
-// it once.
-//
-// scroll={false} is for screens that use a FlatList, since a FlatList
-// cannot be nested inside a ScrollView.
+// Reusable layout used to keep the screens using the same structure and spacing.
 export default function ScreenContainer({
   title,
   subtitle,
@@ -18,6 +13,7 @@ export default function ScreenContainer({
   refreshing = false,
   children,
 }) {
+  // Use ScrollView for normal screens and View when scrolling is handled separately.
   const Body = scroll ? ScrollView : View;
 
   return (
@@ -35,8 +31,7 @@ export default function ScreenContainer({
       <Body
         style={styles.body}
         contentContainerStyle={scroll ? styles.scrollContent : undefined}
-        // Pull to refresh only makes sense when a screen has something to
-        // refresh, so it is only attached when a handler is passed in.
+        // Adds pull to refresh only for screens that need it.
         refreshControl={
           scroll && onRefresh ? (
             <RefreshControl
@@ -53,6 +48,7 @@ export default function ScreenContainer({
   );
 }
 
+// Common styling shared by screens using this container.
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   header: {

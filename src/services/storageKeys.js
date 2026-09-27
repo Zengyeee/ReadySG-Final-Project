@@ -1,6 +1,4 @@
-// Every storage key in one place so I never mistype one somewhere and
-// silently write to the wrong slot. The @readysg: prefix keeps this app's
-// data separate from anything else stored on the device.
+// Storage keys used for saving different types of app data.
 
 export const STORAGE_KEYS = {
   CHECKLIST: '@readysg:checklist',

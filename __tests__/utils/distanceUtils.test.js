@@ -31,7 +31,7 @@ const locations = [
   },
 ];
 
-// Roughly central Singapore, used as the pretend user position.
+// Sample user location used for the distance tests.
 const userCoords = { latitude: 1.3, longitude: 103.84 };
 
 describe('calculateDistanceKm', () => {
@@ -43,8 +43,7 @@ describe('calculateDistanceKm', () => {
     expect(distance).toBeGreaterThan(0);
   });
 
-  // One degree of latitude is about 111 km anywhere on Earth, so this is a
-  // good sanity check that the formula is right rather than just plausible.
+  // Check that the distance calculation gives a reasonable result.
   test('one degree of latitude is roughly 111 km', () => {
     const distance = calculateDistanceKm(0, 0, 1, 0);
     expect(distance).toBeGreaterThan(110);
@@ -71,7 +70,7 @@ describe('addDistances', () => {
     expect(result[0].distanceKm).toBeGreaterThan(0);
   });
 
-  // Without location permission every distance must be unknown, not zero.
+  // Distance should be unknown if the user's location is not available.
   test('distances are null when there are no coordinates', () => {
     const result = addDistances(locations, null);
     result.forEach((location) => expect(location.distanceKm).toBeNull());
@@ -91,7 +90,7 @@ describe('sortByDistance', () => {
     expect(sorted[0].id).toBe('near');
   });
 
-  // Unknown distances must not sort as though they were zero.
+  // Locations without a distance should be placed at the end.
   test('locations with no distance go last', () => {
     const mixed = [
       { id: 'unknown', distanceKm: null },
@@ -119,6 +118,7 @@ describe('filterByType', () => {
 });
 
 describe('formatDistance', () => {
+  // Check that distances are shown in a simple format for the user.
   test('under a kilometre shows metres', () =>
     expect(formatDistance(0.4)).toBe('400 m away'));
   test('over a kilometre shows one decimal place', () =>

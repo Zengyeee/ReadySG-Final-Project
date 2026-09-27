@@ -15,6 +15,7 @@ import {
 } from '../utils/distanceUtils';
 import { colors, radius, spacing, typography, touchTarget } from '../theme/theme';
 
+// Shows nearby support locations such as hospitals and community centres.
 export default function NearbySupportScreen({ navigation }) {
   const { triggerHaptic } = useApp();
 
@@ -23,6 +24,7 @@ export default function NearbySupportScreen({ navigation }) {
   const [locationMessage, setLocationMessage] = useState(null);
   const [activeType, setActiveType] = useState('all');
 
+  // Get the user's location so support locations can be sorted by distance.
   async function handleFindNearby() {
     setLocationStatus('loading');
     const result = await getCurrentCoordinates();
@@ -34,10 +36,7 @@ export default function NearbySupportScreen({ navigation }) {
     if (result.coordinates) triggerHaptic('success');
   }
 
-  // The list works with or without location. Without it, every location is
-  // still listed and usable - distance is an enhancement, not a
-  // requirement. An emergency app that shows nothing until permission is
-  // granted would be useless at exactly the wrong moment.
+  // The list can still be used even if location permission is not available.
   const filtered = filterByType(supportLocations, activeType);
   const withDistances = addDistances(filtered, coordinates);
   const visible = coordinates ? sortByDistance(withDistances) : withDistances;
@@ -57,6 +56,7 @@ export default function NearbySupportScreen({ navigation }) {
         </Pressable>
       }
     >
+      {/* Allow the user to sort support locations by distance. */}
       {locationStatus === 'granted' ? (
         <View style={styles.locationActive}>
           <Ionicons name="location" size={18} color={colors.success} />
@@ -85,8 +85,7 @@ export default function NearbySupportScreen({ navigation }) {
         </Pressable>
       )}
 
-      {/* A denied permission is explained rather than left silent, so the
-          user knows why distances are missing and that nothing is broken. */}
+      {/* Explain if the location cannot be used. */}
       {locationMessage ? (
         <View style={styles.noticeCard}>
           <Ionicons
@@ -98,9 +97,11 @@ export default function NearbySupportScreen({ navigation }) {
         </View>
       ) : null}
 
+      {/* Filter the support locations by their type. */}
       <View style={styles.chipRow}>
         {['all', ...supportTypes].map((type) => {
           const isSelected = activeType === type;
+
           return (
             <Pressable
               key={type}
@@ -117,6 +118,7 @@ export default function NearbySupportScreen({ navigation }) {
         })}
       </View>
 
+      {/* Display the available support locations. */}
       {visible.map((location) => (
         <View key={location.id} style={styles.card}>
           <View style={styles.cardHeader}>
@@ -126,6 +128,7 @@ export default function NearbySupportScreen({ navigation }) {
                 {location.type} · {location.area}
               </Text>
             </View>
+
             {location.distanceKm !== null && shouldShowDistance(location) ? (
               <View style={styles.distanceBadge}>
                 <Text style={styles.distanceText}>
@@ -168,6 +171,7 @@ export default function NearbySupportScreen({ navigation }) {
   );
 }
 
+// Styling for the nearby support screen.
 const styles = StyleSheet.create({
   locationButton: {
     flexDirection: 'row',

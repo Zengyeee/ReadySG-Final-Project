@@ -10,10 +10,7 @@ import { colors, radius, spacing, typography, riskPalette } from '../theme/theme
 
 const LEVELS = ['Low', 'Moderate', 'High'];
 
-// One screen serves both flood and haze guidance - the type comes from the
-// navigation params. The two screens were identical apart from their text,
-// so building them separately would have meant maintaining the same layout
-// twice.
+// Shows flood or haze guidance based on the selected risk type.
 export default function GuidanceScreen({ navigation, route }) {
   const { environment } = useApp();
   const type = route.params?.type === 'haze' ? 'haze' : 'flood';
@@ -22,10 +19,7 @@ export default function GuidanceScreen({ navigation, route }) {
   const actualRisk = environment[type].risk;
   const detail = environment[type].detail;
 
-  // Lets the user read the guidance for any level, not just their current
-  // one. This is deliberately local state: an earlier version passed the
-  // real risk setters down here, which meant tapping "Low" to read the
-  // advice permanently overwrote the measured risk on the dashboard.
+  // Allows the user to view guidance for a different risk level.
   const [previewLevel, setPreviewLevel] = useState(null);
 
   const displayedLevel = previewLevel ?? guidanceLevelFor(actualRisk);
@@ -49,6 +43,7 @@ export default function GuidanceScreen({ navigation, route }) {
         </Pressable>
       }
     >
+      {/* Shows the current flood or haze risk. */}
       <View
         style={[
           styles.riskPanel,
@@ -62,8 +57,7 @@ export default function GuidanceScreen({ navigation, route }) {
         <Text style={typography.caption}>{detail}</Text>
       </View>
 
-      {/* When live data is unavailable the app says so plainly instead of
-          quietly showing Low guidance as though it were measured. */}
+      {/* Show a message when current risk information is not available. */}
       {!isKnownRisk(actualRisk) && !isPreviewing ? (
         <View style={styles.noticeCard}>
           {unavailableGuidance.map((line) => (
@@ -83,6 +77,7 @@ export default function GuidanceScreen({ navigation, route }) {
         {isPreviewing ? `Guidance for ${previewLevel} risk` : 'What you should do'}
       </Text>
 
+      {/* List of recommended actions for the selected risk level. */}
       <View style={styles.actionsCard}>
         {actions.map((action, index) => (
           <View key={action} style={styles.actionRow}>
@@ -96,9 +91,11 @@ export default function GuidanceScreen({ navigation, route }) {
 
       <Text style={styles.sectionLabel}>View guidance for another level</Text>
 
+      {/* Lets the user read guidance for Low, Moderate or High risk. */}
       <View style={styles.levelRow}>
         {LEVELS.map((level) => {
           const isSelected = displayedLevel === level;
+
           return (
             <Pressable
               key={level}
@@ -126,6 +123,7 @@ export default function GuidanceScreen({ navigation, route }) {
         </Pressable>
       ) : null}
 
+      {/* Opens the official source for more information. */}
       <Pressable
         style={styles.sourceCard}
         onPress={() => Linking.openURL(content.sourceUrl)}
@@ -139,6 +137,7 @@ export default function GuidanceScreen({ navigation, route }) {
   );
 }
 
+// Styling for the guidance screen.
 const styles = StyleSheet.create({
   riskPanel: {
     borderRadius: radius.lg,

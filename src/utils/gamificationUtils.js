@@ -1,7 +1,4 @@
-// Points and badges. The rule that shapes this whole file: a reward can
-// only ever be earned once. Without that, a user could untick and retick
-// the same checklist item to farm points indefinitely, which would make
-// the score meaningless.
+// Handles the points, badges and levels used in the app.
 
 import { checklistItems } from '../data/checklistItems';
 import { quizQuestions } from '../data/quizQuestions';
@@ -9,13 +6,12 @@ import { badges } from '../data/badges';
 import { isCategoryComplete, isChecklistComplete } from './progressUtils';
 import { calculatePercentage, PASS_PERCENTAGE } from './quizUtils';
 
-// Bonus for finishing an entire category, on top of the per-item points.
+// Extra points given for completing categories and quizzes.
 export const CATEGORY_BONUS = 25;
 export const QUIZ_PASS_POINTS = 50;
 export const PERFECT_QUIZ_BONUS = 25;
 
-// Reward keys are strings so they can be stored as a simple array and
-// checked with includes().
+// Create different keys for each type of reward.
 export function itemRewardKey(itemId) {
   return `item:${itemId}`;
 }
@@ -36,9 +32,7 @@ export function hasBeenAwarded(awardedRewards = [], key) {
   return awardedRewards.includes(key);
 }
 
-// Works out what a user has earned that they have not already been given.
-// Returns the new points and the keys to record rather than changing
-// anything, so the caller decides when to save.
+// Calculate new rewards that the user has not received before.
 export function calculateNewRewards({
   awardedRewards = [],
   completedIds = [],
@@ -49,7 +43,7 @@ export function calculateNewRewards({
   let pointsEarned = 0;
   const newlyAwarded = [];
 
-  // Points for each newly completed checklist item.
+  // Give points for newly completed checklist items.
   items.forEach((item) => {
     if (!completedIds.includes(item.id)) return;
     const key = itemRewardKey(item.id);
@@ -59,7 +53,7 @@ export function calculateNewRewards({
     newlyAwarded.push(key);
   });
 
-  // Bonus for completing a whole category.
+  // Give bonus points when a whole category is completed.
   ['General', 'Flood', 'Haze'].forEach((category) => {
     if (!isCategoryComplete(completedIds, items, category)) return;
     const key = categoryRewardKey(category);
@@ -69,7 +63,7 @@ export function calculateNewRewards({
     newlyAwarded.push(key);
   });
 
-  // Quiz rewards.
+  // Give points for passing or getting a perfect quiz score.
   const percentage = calculatePercentage(quizAnswers, questions);
 
   if (percentage >= PASS_PERCENTAGE) {
@@ -91,9 +85,7 @@ export function calculateNewRewards({
   return { pointsEarned, newlyAwarded };
 }
 
-// Which badges the user currently qualifies for. Separate from points
-// because a badge is a status rather than a one-off award, so it is
-// recalculated from the data instead of being stored.
+// Check which badges the user has earned.
 export function earnedBadgeIds({
   completedIds = [],
   quizAnswers = {},
@@ -107,7 +99,7 @@ export function earnedBadgeIds({
   if (isCategoryComplete(completedIds, items, 'Haze')) earned.push('haze-ready');
   if (percentage >= PASS_PERCENTAGE) earned.push('safety-scholar');
 
-  // The champion badge needs both halves of the app finished.
+  // The final badge needs the checklist and quiz to be completed.
   if (isChecklistComplete(completedIds, items) && percentage >= PASS_PERCENTAGE) {
     earned.push('preparedness-champion');
   }
@@ -115,7 +107,7 @@ export function earnedBadgeIds({
   return earned;
 }
 
-// Badge objects with their locked or unlocked state, ready for display.
+// Add the earned or locked status to each badge.
 export function badgesWithStatus(earnedIds = []) {
   return badges.map((badge) => ({
     ...badge,
@@ -123,8 +115,7 @@ export function badgesWithStatus(earnedIds = []) {
   }));
 }
 
-// A simple level from total points, so progress feels visible early on
-// rather than only at the very end.
+// Decide the user's level based on their total points.
 export function levelFromPoints(points = 0) {
   if (points >= 250) return { level: 4, title: 'Preparedness Champion' };
   if (points >= 150) return { level: 3, title: 'Prepared' };
@@ -133,13 +124,14 @@ export function levelFromPoints(points = 0) {
   return { level: 0, title: 'Not Started' };
 }
 
-// Points still needed for the next level, for a progress bar.
+// Calculate how many points are needed for the next level.
 export function pointsToNextLevel(points = 0) {
   const thresholds = [25, 75, 150, 250];
   const next = thresholds.find((threshold) => points < threshold);
   return next === undefined ? 0 : next - points;
 }
 
+// Calculate the maximum number of points that can be earned.
 export function totalPossiblePoints(items = checklistItems) {
   const itemPoints = items.reduce((sum, item) => sum + item.points, 0);
   const categoryBonuses = CATEGORY_BONUS * 3;

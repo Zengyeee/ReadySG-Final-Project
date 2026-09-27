@@ -28,6 +28,7 @@ const questions = [
 ];
 
 describe('reward keys', () => {
+  // Check that each type of reward uses its own key.
   test('item keys are namespaced', () =>
     expect(itemRewardKey('f1')).toBe('item:f1'));
   test('category keys are namespaced', () =>
@@ -53,7 +54,7 @@ describe('calculateNewRewards', () => {
     expect(result.newlyAwarded).toContain('item:f1');
   });
 
-  // The anti-farming rule. Unticking and reticking must earn nothing.
+  // A completed item should only give points once.
   test('does not award the same item twice', () => {
     const result = calculateNewRewards({
       awardedRewards: ['item:f1'],
@@ -74,7 +75,7 @@ describe('calculateNewRewards', () => {
       questions,
       items,
     });
-    // Two items at 10 each, plus the bonus.
+    // Points include both completed items and the category bonus.
     expect(result.pointsEarned).toBe(20 + CATEGORY_BONUS);
     expect(result.newlyAwarded).toContain('category:Flood');
   });
@@ -123,7 +124,7 @@ describe('calculateNewRewards', () => {
     expect(result.pointsEarned).toBe(0);
   });
 
-  // Retaking the quiz should not pay out again.
+  // Quiz rewards should not be given again after a retake.
   test('does not award quiz points twice', () => {
     const result = calculateNewRewards({
       awardedRewards: ['quiz:pass'],
@@ -137,6 +138,7 @@ describe('calculateNewRewards', () => {
 });
 
 describe('earnedBadgeIds', () => {
+  // Badges are earned based on checklist and quiz progress.
   test('flood badge for a finished flood category', () => {
     const earned = earnedBadgeIds({
       completedIds: ['f1', 'f2'],
@@ -198,12 +200,14 @@ describe('badgesWithStatus', () => {
     expect(haze.isEarned).toBe(false);
   });
 
+  // Locked badges should still appear so users can see their progress.
   test('always returns every badge so locked ones stay visible', () => {
     expect(badgesWithStatus([])).toHaveLength(4);
   });
 });
 
 describe('levelFromPoints', () => {
+  // Check that the correct level is returned for different point totals.
   test('zero points is not started', () =>
     expect(levelFromPoints(0).level).toBe(0));
   test('25 points reaches level 1', () =>

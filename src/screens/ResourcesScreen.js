@@ -5,8 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import ScreenContainer from '../components/ScreenContainer';
 import { colors, radius, spacing, typography, touchTarget } from '../theme/theme';
 
-// Emergency numbers are kept at the top and styled distinctly so they can
-// be found quickly under stress, rather than being buried in a list.
+// Emergency contact numbers shown in the app.
 const EMERGENCY_CONTACTS = [
   {
     id: 'scdf',
@@ -28,6 +27,7 @@ const EMERGENCY_CONTACTS = [
   },
 ];
 
+// Official sources for more information about emergencies and weather.
 const OFFICIAL_SOURCES = [
   {
     id: 'nea',
@@ -61,13 +61,14 @@ const OFFICIAL_SOURCES = [
   },
 ];
 
+// Shows emergency contacts and useful official sources.
 export default function ResourcesScreen() {
-  // Linking opens the phone dialler rather than calling straight away, so
-  // an accidental tap cannot dial an emergency number.
+  // Opens the phone dialler with the selected number.
   function handleCall(number) {
     Linking.openURL(`tel:${number}`);
   }
 
+  // Opens the selected official website.
   function handleOpen(url) {
     Linking.openURL(url);
   }
@@ -131,6 +132,7 @@ export default function ResourcesScreen() {
   );
 }
 
+// Styling for the emergency contacts and official sources.
 const styles = StyleSheet.create({
   sectionLabel: {
     ...typography.label,

@@ -15,6 +15,7 @@ import {
 import { animateNextLayout } from '../utils/animationUtils';
 import { colors, radius, spacing, typography, touchTarget } from '../theme/theme';
 
+// Shows the preparedness checklist and the user's progress.
 export default function ChecklistScreen() {
   const { completedIds, toggleChecklistItem } = useApp();
   const [activeCategory, setActiveCategory] = useState('all');
@@ -22,19 +23,17 @@ export default function ChecklistScreen() {
   const overallPercentage = calculateProgress(completedIds, checklistItems);
   const completedCount = countCompleted(completedIds, checklistItems);
 
+  // Show all categories or only the category selected by the user.
   const visibleCategories =
     activeCategory === 'all' ? checklistCategories : [activeCategory];
 
-  // Switching category adds or removes whole blocks of rows. Without the
-  // animation the list snaps abruptly, which makes it hard to tell what
-  // changed. LayoutAnimation handles the transition for free.
+  // Change the category with a simple layout animation.
   function handleCategoryChange(category) {
     animateNextLayout();
     setActiveCategory(category);
   }
 
-  // Ticking an item changes its height slightly as the strikethrough and
-  // colour change, so the same animation smooths that too.
+  // Update the checklist item and animate the change.
   function handleToggle(itemId) {
     animateNextLayout('spring');
     toggleChecklistItem(itemId);
@@ -45,6 +44,7 @@ export default function ChecklistScreen() {
       title="Prepare"
       subtitle="Work through these before an emergency happens"
     >
+      {/* Shows the user's overall checklist progress. */}
       <View style={styles.summaryCard}>
         <View style={styles.summaryHeader}>
           <Text style={typography.label}>OVERALL PROGRESS</Text>
@@ -56,6 +56,7 @@ export default function ChecklistScreen() {
         </Text>
       </View>
 
+      {/* Buttons used to filter the checklist by category. */}
       <View style={styles.chipRow}>
         {['all', ...checklistCategories].map((category) => {
           const isSelected = activeCategory === category;
@@ -84,9 +85,8 @@ export default function ChecklistScreen() {
           <View key={category} style={styles.categoryBlock}>
             <View style={styles.categoryHeader}>
               <Text style={styles.categoryTitle}>{category}</Text>
-              {/* A tick on the heading gives immediate feedback that a
-                  whole category is done, which is also what unlocks the
-                  matching badge. */}
+
+              {/* Show when every task in the category is completed. */}
               {progress.isComplete ? (
                 <View style={styles.completeBadge}>
                   <Ionicons name="checkmark-circle" size={14} color={colors.success} />
@@ -101,6 +101,7 @@ export default function ChecklistScreen() {
 
             {items.map((item) => {
               const isDone = completedIds.includes(item.id);
+
               return (
                 <Pressable
                   key={item.id}
@@ -130,6 +131,7 @@ export default function ChecklistScreen() {
   );
 }
 
+// Styling for the checklist, filters and progress section.
 const styles = StyleSheet.create({
   summaryCard: {
     backgroundColor: colors.surface,
@@ -180,7 +182,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     padding: spacing.lg,
     marginBottom: spacing.sm,
-    // Keeps every row comfortably tappable on a real phone.
     minHeight: touchTarget,
   },
   itemText: { ...typography.body, flex: 1, color: colors.text },

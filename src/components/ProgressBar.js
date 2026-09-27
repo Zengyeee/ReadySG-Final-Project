@@ -2,29 +2,24 @@ import React, { useEffect, useRef } from 'react';
 import { View, Animated, StyleSheet } from 'react-native';
 import { colors, radius } from '../theme/theme';
 
-// Animated progress bar using the Animated API from the module. A bar that
-// slides into place makes it obvious that the number changed, which a
-// static width would not.
+// Progress bar used to visually show the user's progress.
 export default function ProgressBar({ percentage, height = 10, color }) {
-  // useRef keeps the same Animated.Value between renders. With useState a
-  // new value would be created each render and the bar would jump back to
-  // zero instead of animating from where it was.
+  // Keeps the animation value when the component renders again.
   const widthAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    // Animate the bar when the progress percentage changes.
     Animated.timing(widthAnim, {
       toValue: percentage,
       duration: 600,
-      // Width cannot be animated on the native thread, so this has to be
-      // false here - setting it true throws.
       useNativeDriver: false,
     }).start();
   }, [percentage, widthAnim]);
 
+  // Converts the progress value from 0-100 into the width of the bar.
   const widthInterpolated = widthAnim.interpolate({
     inputRange: [0, 100],
     outputRange: ['0%', '100%'],
-    // Clamped so a value above 100 cannot overflow the track.
     extrapolate: 'clamp',
   });
 
@@ -34,8 +29,7 @@ export default function ProgressBar({ percentage, height = 10, color }) {
       testID="progress-bar"
       accessible
       accessibilityRole="progressbar"
-      // Without this a screen reader user would have no idea how far along
-      // they are, since the bar carries no text.
+      // Allows screen readers to understand the current progress.
       accessibilityValue={{ min: 0, max: 100, now: percentage }}
     >
       <Animated.View
@@ -48,6 +42,7 @@ export default function ProgressBar({ percentage, height = 10, color }) {
   );
 }
 
+// Styling for the progress bar background and filled section.
 const styles = StyleSheet.create({
   track: {
     backgroundColor: colors.border,

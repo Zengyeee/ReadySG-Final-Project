@@ -1,18 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Wrapper around AsyncStorage. Two reasons this file exists:
-// 1. AsyncStorage only stores strings, so every read and write needs
-//    JSON.parse and JSON.stringify. Doing that in one place means I cannot
-//    forget it somewhere.
-// 2. If a read fails or the stored data is corrupted, a fallback is
-//    returned instead of letting the whole app crash on startup.
-
+// Handles saving and loading data from AsyncStorage.
 export async function loadData(key, fallback = null) {
   try {
     const raw = await AsyncStorage.getItem(key);
-    // getItem returns null when the key has never been written, which is
-    // normal on first launch rather than an error.
+
+    // Use the fallback value if there is no saved data yet.
     if (raw === null) return fallback;
+
     return JSON.parse(raw);
   } catch (error) {
     console.warn(`Could not load ${key}:`, error);
@@ -22,6 +17,7 @@ export async function loadData(key, fallback = null) {
 
 export async function saveData(key, value) {
   try {
+    // Convert the data to JSON before saving it.
     await AsyncStorage.setItem(key, JSON.stringify(value));
     return true;
   } catch (error) {
@@ -30,7 +26,7 @@ export async function saveData(key, value) {
   }
 }
 
-// Used by the reset option in Settings.
+// Clears the saved data when the user resets the app.
 export async function clearAllData(keys) {
   try {
     await AsyncStorage.multiRemove(keys);

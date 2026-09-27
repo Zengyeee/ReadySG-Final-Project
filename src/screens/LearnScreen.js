@@ -15,9 +15,11 @@ import {
 } from '../utils/quizUtils';
 import { colors, radius, spacing, typography } from '../theme/theme';
 
+// Shows the safety quiz and gives feedback for each answer.
 export default function LearnScreen() {
   const { quizAnswers, answerQuestion, resetQuiz } = useApp();
 
+  // Calculate the user's current quiz progress and score.
   const answered = countAnswered(quizAnswers, quizQuestions);
   const score = calculateScore(quizAnswers, quizQuestions);
   const percentage = calculatePercentage(quizAnswers, quizQuestions);
@@ -28,6 +30,7 @@ export default function LearnScreen() {
       title="Learn"
       subtitle="Test what you know about staying safe"
     >
+      {/* Shows the user's quiz progress and final result. */}
       <View style={styles.summaryCard}>
         <View style={styles.summaryHeader}>
           <Text style={typography.label}>PROGRESS</Text>
@@ -65,9 +68,7 @@ export default function LearnScreen() {
               const isChosen = selected === option;
               const isAnswer = option === question.answer;
 
-              // Once answered, the correct option is always highlighted -
-              // not just the one the user picked. The point is learning
-              // the right answer, not only being told you were wrong.
+              // Show the correct answer and highlight a wrong choice.
               let optionStyle = styles.option;
               let textStyle = styles.optionText;
 
@@ -83,8 +84,7 @@ export default function LearnScreen() {
                 <Pressable
                   key={option}
                   style={optionStyle}
-                  // Locked after answering so a wrong answer cannot be
-                  // quietly changed to a right one.
+                  // Stop the answer from being changed after it is selected.
                   disabled={hasAnswered}
                   onPress={() => answerQuestion(question.id, option)}
                   accessibilityRole="radio"
@@ -98,14 +98,17 @@ export default function LearnScreen() {
                       color={colors.success}
                     />
                   ) : null}
+
                   {hasAnswered && isChosen && !isAnswer ? (
                     <Ionicons name="close-circle" size={18} color={colors.danger} />
                   ) : null}
+
                   <Text style={textStyle}>{option}</Text>
                 </Pressable>
               );
             })}
 
+            {/* Explain the answer after the user makes a choice. */}
             {hasAnswered ? (
               <View
                 style={[
@@ -123,6 +126,7 @@ export default function LearnScreen() {
         );
       })}
 
+      {/* Allows the user to retake the quiz. */}
       {answered > 0 ? (
         <Pressable
           style={styles.resetButton}
@@ -138,6 +142,7 @@ export default function LearnScreen() {
   );
 }
 
+// Styling for the quiz, answers and feedback.
 const styles = StyleSheet.create({
   summaryCard: {
     backgroundColor: colors.surface,

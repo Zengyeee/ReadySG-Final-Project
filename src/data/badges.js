@@ -1,5 +1,4 @@
-// Badges reward preparedness learning rather than app usage. Each one can
-// only be earned once - the awarding logic lives in gamificationUtils.
+// Badges are earned when the user completes different preparedness activities.
 
 export const badges = [
   {

@@ -17,9 +17,11 @@ import {
 } from '../utils/gamificationUtils';
 import { colors, radius, spacing, typography } from '../theme/theme';
 
+// Shows the user's points, level, badges and overall preparedness progress.
 export default function AchievementsScreen({ navigation }) {
   const { points, earnedBadges, completedIds, quizAnswers } = useApp();
 
+  // Calculate the user's current achievement progress.
   const level = levelFromPoints(points);
   const toNext = pointsToNextLevel(points);
   const maxPoints = totalPossiblePoints();
@@ -43,6 +45,7 @@ export default function AchievementsScreen({ navigation }) {
         </Pressable>
       }
     >
+      {/* Shows the user's current level and points. */}
       <View style={styles.levelCard}>
         <Text style={styles.levelLabel}>CURRENT LEVEL</Text>
         <Text style={styles.levelTitle}>{level.title}</Text>
@@ -61,6 +64,7 @@ export default function AchievementsScreen({ navigation }) {
 
       <Text style={styles.sectionLabel}>BADGES</Text>
 
+      {/* Show both earned and locked badges. */}
       {badges.map((badge) => (
         <View
           key={badge.id}
@@ -84,9 +88,7 @@ export default function AchievementsScreen({ navigation }) {
               )}
             </View>
 
-            {/* Locked badges show how to unlock them rather than just being
-                greyed out. A locked badge with no explanation is a dead end
-                rather than something to aim for. */}
+            {/* Locked badges tell the user how they can unlock them. */}
             <Text style={typography.caption}>
               {badge.isEarned ? badge.description : badge.howToUnlock}
             </Text>
@@ -96,6 +98,7 @@ export default function AchievementsScreen({ navigation }) {
 
       <Text style={styles.sectionLabel}>WHERE YOUR POINTS COME FROM</Text>
 
+      {/* Shows progress from the checklist and safety quiz. */}
       <View style={styles.breakdownCard}>
         <Pressable
           style={styles.breakdownRow}
@@ -139,6 +142,7 @@ export default function AchievementsScreen({ navigation }) {
   );
 }
 
+// Styling for the achievements screen.
 const styles = StyleSheet.create({
   levelCard: {
     backgroundColor: colors.primary,

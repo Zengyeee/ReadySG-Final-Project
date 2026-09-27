@@ -1,9 +1,6 @@
 import { parsePsiResponse, parseFloodResponse } from '../../src/services/api';
 
-// The parsers are pure, so they can be tested with fake responses instead
-// of making real network calls. That also lets me test the malformed cases
-// that would be almost impossible to trigger against the live API.
-
+// Tests the API data parsing without needing to make real network requests.
 describe('parsePsiResponse', () => {
   const validResponse = {
     code: 0,
@@ -27,8 +24,7 @@ describe('parsePsiResponse', () => {
   };
 
   test('returns the highest regional reading', () => {
-    // National is 52 but west is 55 - reporting the highest avoids
-    // understating conditions where the user actually is.
+    // Use the highest regional PSI reading for the current haze condition.
     expect(parsePsiResponse(validResponse)).toBe(55);
   });
 
@@ -41,7 +37,7 @@ describe('parsePsiResponse', () => {
     expect(parsePsiResponse(response)).toBe(42);
   });
 
-  // Every one of these must return null so the risk shows as Unavailable.
+  // Invalid or missing PSI data should return null.
   test('null response returns null', () =>
     expect(parsePsiResponse(null)).toBeNull());
   test('empty object returns null', () => expect(parsePsiResponse({})).toBeNull());
@@ -86,8 +82,7 @@ describe('parsePsiResponse', () => {
 });
 
 describe('parseFloodResponse', () => {
-  // This shape is taken from the real endpoint. Each record is a two-minute
-  // observation snapshot, and the alerts live inside item.readings.
+  // Creates sample flood records for testing different API responses.
   function makeRecord(readings, datetime = '2026-09-26T16:46:54+08:00') {
     return {
       datetime,
@@ -96,9 +91,7 @@ describe('parseFloodResponse', () => {
     };
   }
 
-  // The bug this test exists to prevent: counting the records themselves
-  // returned 25 and permanently reported High flood risk, because the
-  // endpoint polls every two minutes whether anything is happening or not.
+  // Only the readings in the latest record should be counted as active alerts.
   test('counts readings in the latest record, not the number of records', () => {
     const response = {
       data: {
@@ -134,11 +127,11 @@ describe('parseFloodResponse', () => {
         ],
       },
     };
-    // The older record had an alert but the latest does not, so the current
-    // state is zero.
+    // Older alerts should not affect the current flood condition.
     expect(parseFloodResponse(response)).toBe(0);
   });
 
+  // Invalid or missing flood data should return null.
   test('null response returns null', () =>
     expect(parseFloodResponse(null)).toBeNull());
   test('empty object returns null', () =>

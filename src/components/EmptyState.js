@@ -3,8 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography } from '../theme/theme';
 
-// Shown whenever a list has nothing in it. Every list screen needs one of
-// these - a blank white screen looks broken rather than empty.
+// Shows a simple message when there is no content to display.
 export default function EmptyState({ icon = 'file-tray-outline', title, message }) {
   return (
     <View style={styles.container}>
@@ -15,6 +14,7 @@ export default function EmptyState({ icon = 'file-tray-outline', title, message 
   );
 }
 
+// Styling for the empty state layout and text.
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',

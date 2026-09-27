@@ -5,9 +5,7 @@ import ChecklistScreen from '../screens/ChecklistScreen';
 
 const Stack = createNativeStackNavigator();
 
-// Only one screen for now. It is a stack rather than a plain screen so
-// achievements and any future detail screens can be pushed on top later
-// without restructuring the navigator.
+// Navigation stack used for the preparedness checklist.
 export default function PrepareStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>

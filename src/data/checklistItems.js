@@ -1,8 +1,7 @@
-// The preparedness checklist. Points are awarded per item, with a bonus
-// for finishing a whole category - that logic lives in gamificationUtils.
+// Checklist items used to help users prepare for flood, haze and general emergencies.
 
 export const checklistItems = [
-  // General
+  // General preparedness
   {
     id: 'weather',
     category: 'General',
@@ -28,7 +27,7 @@ export const checklistItems = [
     points: 10,
   },
 
-  // Flood
+  // Flood preparedness
   {
     id: 'route',
     category: 'Flood',
@@ -54,7 +53,7 @@ export const checklistItems = [
     points: 10,
   },
 
-  // Haze
+  // Haze preparedness
   {
     id: 'mask',
     category: 'Haze',

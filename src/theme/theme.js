@@ -1,19 +1,17 @@
-// All the design values live in one place. If I want to change the accent
-// colour or the spacing scale later, I only edit this file rather than
-// hunting through every screen.
+// Common design values used throughout the app.
 
 export const colors = {
-  // Brand
+  // Main app colours
   primary: '#1f3f66',
   primaryLight: '#e0ecff',
   primaryBorder: '#bfdbfe',
 
-  // Surfaces
+  // Background colours
   background: '#edf4fb',
   surface: '#ffffff',
   surfaceAlt: '#f8fafc',
 
-  // Text
+  // Text colours
   text: '#0f172a',
   textSecondary: '#475569',
   textMuted: '#64748b',
@@ -21,8 +19,7 @@ export const colors = {
   border: '#e5e7eb',
   borderStrong: '#cbd5e1',
 
-  // Risk colours. Each one is always shown with a text label as well -
-  // colour on its own would be unreadable for colour-blind users.
+  // Colours used for the different risk levels.
   riskLow: { bg: '#ecfdf5', border: '#86efac', text: '#047857' },
   riskModerate: { bg: '#fffbeb', border: '#fcd34d', text: '#b45309' },
   riskHigh: { bg: '#fef2f2', border: '#fecaca', text: '#991b1b' },
@@ -33,8 +30,7 @@ export const colors = {
   danger: '#b91c1c',
 };
 
-// Spacing scale. Sticking to these values keeps the layout consistent
-// instead of me guessing 13px here and 17px there.
+// Spacing values used to keep the layout consistent.
 export const spacing = {
   xs: 4,
   sm: 8,
@@ -52,8 +48,7 @@ export const radius = {
   pill: 999,
 };
 
-// Minimum size for anything tappable, so buttons are easy to hit on a
-// real phone rather than just on a desktop browser.
+// Minimum size used for buttons and other items that can be pressed.
 export const touchTarget = 44;
 
 export const typography = {
@@ -73,9 +68,7 @@ export const typography = {
 
 export const maxContentWidth = 480;
 
-// Looks up the right colour set for a risk level. Returning the unknown
-// palette for anything unrecognised means a missing value can never
-// accidentally display as green.
+// Return the correct colours for each risk level.
 export function riskPalette(risk) {
   if (risk === 'Low') return colors.riskLow;
   if (risk === 'Moderate') return colors.riskModerate;

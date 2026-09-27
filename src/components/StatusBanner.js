@@ -4,14 +4,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing } from '../theme/theme';
 import { describeAge } from '../utils/dateUtils';
 
-// Tells the user where the information on screen came from.
-//
-// Showing cached data without saying so would be dishonest in an app
-// people might rely on during an emergency, so a cached reading always
-// carries its age.
+// Shows the user whether the risk information is live, cached or unavailable.
 export default function StatusBanner({ dataStatus, cacheAge, isOnline }) {
-  // Live data needs no explanation - a banner on every successful load
-  // would just be noise.
+  // No banner is needed when the latest live data is working normally.
   if (dataStatus === 'live' && isOnline) return null;
 
   let icon = 'information-circle-outline';
@@ -19,6 +14,7 @@ export default function StatusBanner({ dataStatus, cacheAge, isOnline }) {
   let tone = styles.neutral;
   let textTone = styles.neutralText;
 
+  // Show different messages depending on the network and data status.
   if (!isOnline) {
     icon = 'cloud-offline-outline';
     message =
@@ -61,6 +57,7 @@ export default function StatusBanner({ dataStatus, cacheAge, isOnline }) {
   );
 }
 
+// Different styles are used to make warning and unavailable states clearer.
 const styles = StyleSheet.create({
   banner: {
     flexDirection: 'row',

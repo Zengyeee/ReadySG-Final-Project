@@ -9,13 +9,13 @@ import SettingsScreen from '../screens/SettingsScreen';
 
 const Stack = createNativeStackNavigator();
 
-// The Home tab has its own stack so guidance, achievements, nearby support
-// and settings can open on top of the dashboard while the tab bar stays
-// visible.
+// Navigation stack used for the Home section of the app.
 export default function HomeStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Dashboard" component={HomeScreen} />
+
+      {/* These screens open on top of the main dashboard. */}
       <Stack.Screen
         name="Guidance"
         component={GuidanceScreen}

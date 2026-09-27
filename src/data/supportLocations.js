@@ -1,7 +1,4 @@
-// Support points around Singapore. Coordinates are approximate and used
-// only for sorting by distance - this is not a navigation service.
-// Keeping them in a data file means entries can be checked and updated
-// without touching any application code.
+// Support locations used to help users find nearby services around Singapore.
 
 export const supportLocations = [
   {
@@ -154,6 +151,7 @@ export const supportLocations = [
   },
 ];
 
+// Categories used to filter the support locations.
 export const supportTypes = [
   'Hospital',
   'Clinic',

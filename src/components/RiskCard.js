@@ -3,17 +3,12 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, typography, riskPalette, touchTarget } from '../theme/theme';
 
-// The main risk display on the dashboard.
-//
-// Two accessibility decisions here. The risk level is always shown as text
-// as well as colour, because colour alone would be unreadable for a
-// colour-blind user and this is an app where misreading the level matters.
-// And an unknown risk gets a question-mark icon rather than a colour
-// swatch, so it never reads as a real level at a glance.
+// Displays the current flood or haze risk on the dashboard.
 export default function RiskCard({ title, icon, risk, detail, onPress }) {
   const palette = riskPalette(risk);
   const isUnavailable = risk === 'Unavailable';
 
+  // Show the risk as text as well as colour for better accessibility.
   const spokenRisk = isUnavailable ? 'Risk unknown' : `${risk} risk`;
 
   return (
@@ -42,6 +37,7 @@ export default function RiskCard({ title, icon, risk, detail, onPress }) {
       </View>
 
       <View style={styles.levelRow}>
+        {/* Show a question mark when the risk data is not available. */}
         {isUnavailable && (
           <Ionicons
             name="help-circle-outline"
@@ -60,6 +56,7 @@ export default function RiskCard({ title, icon, risk, detail, onPress }) {
   );
 }
 
+// Styling for the risk card and its information.
 const styles = StyleSheet.create({
   card: {
     borderRadius: radius.lg,

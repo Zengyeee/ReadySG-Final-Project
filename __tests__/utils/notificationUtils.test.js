@@ -33,7 +33,7 @@ describe('shouldNotify', () => {
     ).toBe(true);
   });
 
-  // Good news does not need to interrupt anyone.
+  // Do not send a notification when the risk becomes lower.
   test('does not notify when risk falls', () => {
     expect(
       shouldNotify({
@@ -70,7 +70,7 @@ describe('shouldNotify', () => {
     ).toBe(false);
   });
 
-  // Coming back online to find High risk is worth knowing about.
+  // Notify the user if a high risk is found after data becomes available again.
   test('notifies when recovering from Unavailable to High', () => {
     expect(
       shouldNotify({
@@ -83,8 +83,7 @@ describe('shouldNotify', () => {
     ).toBe(true);
   });
 
-  // The rule that stops the app becoming annoying. Refreshing five times
-  // during a hazy afternoon should not produce five notifications.
+  // Avoid sending the same risk notification many times in one day.
   test('does not repeat the same level on the same day', () => {
     expect(
       shouldNotify({
@@ -109,7 +108,7 @@ describe('shouldNotify', () => {
     ).toBe(true);
   });
 
-  // Escalating from Moderate to High on the same day is new information.
+  // A higher risk level should still notify the user on the same day.
   test('notifies when the level escalates on the same day', () => {
     expect(
       shouldNotify({
@@ -122,7 +121,7 @@ describe('shouldNotify', () => {
     ).toBe(true);
   });
 
-  // Flood and haze are tracked separately.
+  // Flood and haze notifications are handled separately.
   test('a haze notification does not suppress a flood one', () => {
     expect(
       shouldNotify({
@@ -150,6 +149,7 @@ describe('shouldNotify', () => {
 });
 
 describe('recordNotification', () => {
+  // Store the last notification so repeated alerts can be prevented.
   test('stores the level and time for that type', () => {
     const result = recordNotification({}, 'haze', 'High', today);
     expect(result.haze.risk).toBe('High');
@@ -165,6 +165,7 @@ describe('recordNotification', () => {
 });
 
 describe('buildRiskMessage', () => {
+  // Check that the notification gives useful guidance for each risk.
   test('high flood message warns about flood water', () => {
     const message = buildRiskMessage('flood', 'High');
     expect(message.title).toContain('Flood');

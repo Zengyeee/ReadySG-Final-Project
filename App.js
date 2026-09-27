@@ -7,11 +7,9 @@ import TabNavigator from './src/navigation/TabNavigator';
 import { AppProvider } from './src/context/AppContext';
 import { enableLayoutAnimations } from './src/utils/animationUtils';
 
-// App.js stays small on purpose - it only sets up the providers that
-// everything else depends on. All the actual screens live under src/.
+// Main starting point of the ReadySG app.
 export default function App() {
-  // Android needs layout animations switched on explicitly, and it only
-  // has to happen once when the app starts.
+  // Enable layout animations when the app starts.
   useEffect(() => {
     enableLayoutAnimations();
   }, []);

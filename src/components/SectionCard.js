@@ -3,9 +3,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, spacing, typography, touchTarget } from '../theme/theme';
 
-// A tappable card used for the sections on the home dashboard. Pulled out
-// as a component because the same shape appears four or five times and
-// duplicating it would make changing the style a chore.
+// Reusable card used to show different sections on the home dashboard.
 export default function SectionCard({
   icon,
   title,
@@ -14,10 +12,10 @@ export default function SectionCard({
   onPress,
   children,
 }) {
+  // Makes the card clickable only when an onPress function is provided.
   const Wrapper = onPress ? Pressable : View;
 
-  // Screen readers announce the whole card as one thing rather than
-  // reading out disconnected fragments of title, subtitle and number.
+  // Combines the important information into one label for screen readers.
   const label = [title, subtitle, value ? `${value} points` : null]
     .filter(Boolean)
     .join('. ');
@@ -33,8 +31,7 @@ export default function SectionCard({
       <View style={styles.header}>
         {icon ? (
           <View style={styles.iconCircle}>
-            {/* The icon repeats information already in the text, so it is
-                hidden from screen readers rather than announced twice. */}
+            {/* Icon is hidden from screen readers because the text already explains it. */}
             <Ionicons
               name={icon}
               size={18}
@@ -51,6 +48,8 @@ export default function SectionCard({
         </View>
 
         {value ? <Text style={styles.value}>{value}</Text> : null}
+
+        {/* Show an arrow when the card can be pressed. */}
         {onPress ? (
           <Ionicons
             name="chevron-forward"
@@ -67,6 +66,7 @@ export default function SectionCard({
   );
 }
 
+// Styling shared by all section cards.
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,

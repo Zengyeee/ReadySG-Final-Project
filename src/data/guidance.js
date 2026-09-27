@@ -1,5 +1,4 @@
-// Risk-based guidance text. Kept as data rather than inside a screen so
-// the wording can be checked and updated without touching any logic.
+// Guidance shown to users based on the current flood or haze risk level.
 
 export const guidance = {
   flood: {
@@ -58,8 +57,7 @@ export const guidance = {
   },
 };
 
-// Shown when live and cached data are both unavailable. The app should
-// say it does not know rather than guessing that the risk is low.
+// Used when the app cannot get live or saved risk information.
 export const unavailableGuidance = [
   'Live risk information could not be loaded.',
   'Check official sources directly using the Resources tab.',

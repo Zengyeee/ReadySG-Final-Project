@@ -17,6 +17,7 @@ import { levelFromPoints, pointsToNextLevel } from '../utils/gamificationUtils';
 import { formatUpdatedAt } from '../utils/dateUtils';
 import { colors, radius, spacing, typography } from '../theme/theme';
 
+// Main dashboard showing current risks and the user's preparedness progress.
 export default function HomeScreen({ navigation }) {
   const {
     environment,
@@ -32,14 +33,13 @@ export default function HomeScreen({ navigation }) {
   const isOnline = useNetworkStatus();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Everything below is worked out from the stored data rather than saved
-  // separately, so the dashboard can never disagree with the Prepare or
-  // Learn screens - there is only ever one copy of the data.
+  // Calculate the user's current checklist, quiz and level progress.
   const checklistPercentage = calculateProgress(completedIds, checklistItems);
   const quizPercentage = calculatePercentage(quizAnswers, quizQuestions);
   const level = levelFromPoints(points);
   const toNextLevel = pointsToNextLevel(points);
 
+  // Refresh the latest flood and haze information.
   async function handleRefresh() {
     setIsRefreshing(true);
     await refreshEnvironment();
@@ -71,6 +71,7 @@ export default function HomeScreen({ navigation }) {
 
       <Text style={styles.sectionLabel}>CURRENT CONDITIONS</Text>
 
+      {/* Current flood and haze risk information. */}
       <RiskCard
         title="Flood"
         icon="🌊"
@@ -95,6 +96,7 @@ export default function HomeScreen({ navigation }) {
 
       <Text style={styles.sectionLabel}>YOUR PREPAREDNESS</Text>
 
+      {/* Shows the user's points, level and badges. */}
       <SectionCard
         icon="trophy-outline"
         title={level.title}
@@ -137,6 +139,7 @@ export default function HomeScreen({ navigation }) {
 
       <Text style={styles.sectionLabel}>IN AN EMERGENCY</Text>
 
+      {/* Quick access to nearby support and emergency contacts. */}
       <SectionCard
         icon="location-outline"
         title="Nearby support"
@@ -161,6 +164,7 @@ export default function HomeScreen({ navigation }) {
   );
 }
 
+// Styling for the home dashboard.
 const styles = StyleSheet.create({
   sectionLabel: {
     ...typography.label,

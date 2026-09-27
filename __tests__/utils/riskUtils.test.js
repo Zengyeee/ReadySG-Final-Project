@@ -10,7 +10,7 @@ import {
 } from '../../src/utils/riskUtils';
 
 describe('classifyPsi', () => {
-  // Boundary values matter most here - this is where off-by-one errors hide.
+  // Check that PSI readings are placed into the correct risk level.
   test('0 is Low', () => expect(classifyPsi(0)).toBe('Low'));
   test('50 is Low', () => expect(classifyPsi(50)).toBe('Low'));
   test('51 is Moderate', () => expect(classifyPsi(51)).toBe('Moderate'));
@@ -18,7 +18,7 @@ describe('classifyPsi', () => {
   test('101 is High', () => expect(classifyPsi(101)).toBe('High'));
   test('very high readings are High', () => expect(classifyPsi(400)).toBe('High'));
 
-  // The safety property: bad data must never read as Low.
+  // Invalid PSI values should be shown as unavailable instead of giving a wrong risk.
   test('null is Unavailable', () => expect(classifyPsi(null)).toBe('Unavailable'));
   test('undefined is Unavailable', () =>
     expect(classifyPsi(undefined)).toBe('Unavailable'));
@@ -30,13 +30,14 @@ describe('classifyPsi', () => {
 });
 
 describe('classifyFloodAlertCount', () => {
+  // Flood risk is decided based on the number of active alerts.
   test('0 alerts is Low', () => expect(classifyFloodAlertCount(0)).toBe('Low'));
   test('1 alert is Moderate', () =>
     expect(classifyFloodAlertCount(1)).toBe('Moderate'));
   test('2 alerts is High', () => expect(classifyFloodAlertCount(2)).toBe('High'));
   test('many alerts is High', () => expect(classifyFloodAlertCount(9)).toBe('High'));
 
-  // An unreadable response is not the same as zero alerts.
+  // Missing data should not be treated as having zero flood alerts.
   test('null is Unavailable rather than Low', () =>
     expect(classifyFloodAlertCount(null)).toBe('Unavailable'));
   test('undefined is Unavailable', () =>
@@ -53,6 +54,7 @@ describe('describePsi', () => {
 });
 
 describe('describeFloodAlerts', () => {
+  // Check the text shown to the user for different flood alert counts.
   test('no alerts', () =>
     expect(describeFloodAlerts(0)).toBe('No active PUB flood alerts'));
   test('one alert uses the singular', () =>
@@ -74,6 +76,7 @@ describe('isKnownRisk', () => {
 });
 
 describe('guidanceLevelFor', () => {
+  // Known risk levels should display the matching guidance.
   test('passes known levels straight through', () => {
     expect(guidanceLevelFor('High')).toBe('High');
     expect(guidanceLevelFor('Moderate')).toBe('Moderate');
@@ -83,6 +86,7 @@ describe('guidanceLevelFor', () => {
 });
 
 describe('isMoreSevere', () => {
+  // Check whether a new risk level is more serious than the previous one.
   test('Low to High is an escalation', () =>
     expect(isMoreSevere('High', 'Low')).toBe(true));
   test('Moderate to High is an escalation', () =>
@@ -91,12 +95,12 @@ describe('isMoreSevere', () => {
     expect(isMoreSevere('High', 'High')).toBe(false));
   test('High dropping to Low is not', () =>
     expect(isMoreSevere('Low', 'High')).toBe(false));
-  // Coming back online to find High risk should still notify.
   test('Unavailable to High is an escalation', () =>
     expect(isMoreSevere('High', 'Unavailable')).toBe(true));
 });
 
 describe('unavailableReading', () => {
+  // Create a safe result when live risk data cannot be loaded.
   test('builds a reading with no value', () => {
     const reading = unavailableReading('Network error');
     expect(reading.risk).toBe('Unavailable');

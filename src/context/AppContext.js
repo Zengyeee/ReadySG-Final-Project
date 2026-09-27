@@ -28,10 +28,7 @@ import {
   buildRiskMessage,
 } from '../utils/notificationUtils';
 
-// All the app's state lives here. Without it I would have to pass the
-// checklist, quiz answers and points down through every screen as props,
-// and the home dashboard would never know when something changed on the
-// checklist screen.
+// Main context used to share data between the different screens.
 const AppContext = createContext(null);
 
 const DEFAULT_SETTINGS = {
@@ -39,8 +36,7 @@ const DEFAULT_SETTINGS = {
   hapticsEnabled: true,
 };
 
-// What the dashboard shows before the first fetch finishes. Deliberately
-// not "Low" - the app should say it does not know yet rather than guess.
+// Default state before the flood and haze information has been loaded.
 const INITIAL_ENVIRONMENT = {
   flood: { risk: 'Unavailable', detail: 'Loading flood information', value: null },
   haze: { risk: 'Unavailable', detail: 'Loading air quality information', value: null },
@@ -48,6 +44,7 @@ const INITIAL_ENVIRONMENT = {
 };
 
 export function AppProvider({ children }) {
+  // Stores the main progress and settings used throughout the application.
   const [completedIds, setCompletedIds] = useState([]);
   const [quizAnswers, setQuizAnswers] = useState({});
   const [bestScore, setBestScore] = useState(0);
@@ -56,19 +53,19 @@ export function AppProvider({ children }) {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [lastNotified, setLastNotified] = useState({});
 
+  // Stores the current flood and haze information.
   const [environment, setEnvironment] = useState(INITIAL_ENVIRONMENT);
   const [dataStatus, setDataStatus] = useState('loading');
   const [cacheAge, setCacheAge] = useState(null);
 
   const [isLoading, setIsLoading] = useState(true);
 
-  // A ref rather than state, because the notification check needs the
-  // previous risk at the moment a fetch completes. Reading it from state
-  // inside the fetch would give a stale value.
+  // Keeps the previous risk so the app can detect when the risk becomes higher.
   const previousRiskRef = useRef({ flood: 'Unavailable', haze: 'Unavailable' });
 
   // ---- Loading saved data ----
 
+  // Loads the user's saved progress and settings when the app starts.
   useEffect(() => {
     async function loadEverything() {
       const savedChecklist = await loadData(STORAGE_KEYS.CHECKLIST, []);
@@ -84,22 +81,20 @@ export function AppProvider({ children }) {
       setBestScore(savedBest);
       setPoints(savedPoints);
       setAwardedRewards(savedRewards);
-      // Spreading the defaults first means a setting added in a later
-      // version will not be missing for an existing user.
+
+      // Keeps the default settings if a new setting is added later.
       setSettings({ ...DEFAULT_SETTINGS, ...savedSettings });
       setLastNotified(savedNotified);
 
       setIsLoading(false);
     }
+
     loadEverything();
   }, []);
 
   // ---- Saving ----
-  //
-  // The isLoading guard is essential. Effects run on first render, so
-  // without it these would save empty values over the real saved data
-  // before the load had finished, wiping everything on every launch.
 
+  // Save the user's data whenever it changes after the first load is finished.
   useEffect(() => {
     if (!isLoading) saveData(STORAGE_KEYS.CHECKLIST, completedIds);
   }, [completedIds, isLoading]);
@@ -130,6 +125,7 @@ export function AppProvider({ children }) {
 
   // ---- Haptics ----
 
+  // Gives simple vibration feedback when the user completes an action.
   const triggerHaptic = useCallback(
     (style = 'success') => {
       if (Platform.OS === 'web') return;
@@ -148,6 +144,7 @@ export function AppProvider({ children }) {
 
   // ---- Rewards ----
 
+  // Calculates and adds new points earned from checklist or quiz progress.
   const grantRewards = useCallback(
     (nextCompletedIds, nextAnswers) => {
       const { pointsEarned, newlyAwarded } = calculateNewRewards({
@@ -170,6 +167,7 @@ export function AppProvider({ children }) {
 
   // ---- Checklist ----
 
+  // Updates the checklist and gives rewards for newly completed items.
   const toggleChecklistItem = useCallback(
     (itemId) => {
       const wasCompleted = completedIds.includes(itemId);
@@ -177,7 +175,7 @@ export function AppProvider({ children }) {
 
       setCompletedIds(next);
 
-      // Only celebrate when ticking something on, not when unticking.
+      // Only give feedback and check rewards when an item is completed.
       if (!wasCompleted) {
         triggerHaptic('light');
         grantRewards(next, quizAnswers);
@@ -188,6 +186,7 @@ export function AppProvider({ children }) {
 
   // ---- Quiz ----
 
+  // Saves an answer, updates the best score and checks for new rewards.
   const answerQuestion = useCallback(
     (questionId, answer) => {
       const next = { ...quizAnswers, [questionId]: answer };
@@ -204,18 +203,14 @@ export function AppProvider({ children }) {
     [quizAnswers, completedIds, triggerHaptic, grantRewards]
   );
 
-  // Clears the answers so the quiz can be retaken. Points and the best
-  // score are deliberately kept - retaking should not cost anything, and
-  // the reward keys stop it paying out twice.
+  // Clears the current answers so the user can try the quiz again.
   const resetQuiz = useCallback(() => {
     setQuizAnswers({});
   }, []);
 
   // ---- Notifications ----
 
-  // Checks both risks after a fetch and notifies only if something has
-  // genuinely worsened. All the decision logic is in notificationUtils so
-  // it can be unit tested; this function only does the sending.
+  // Checks whether flood or haze risk increased and sends a notification if needed.
   const checkForRiskNotifications = useCallback(
     async (nextEnvironment) => {
       if (!settings.riskNotificationsEnabled) return;
@@ -254,6 +249,7 @@ export function AppProvider({ children }) {
 
   // ---- Environment data ----
 
+  // Gets the latest flood and haze information, with cached data as backup.
   const refreshEnvironment = useCallback(async () => {
     setDataStatus('loading');
 
@@ -267,9 +263,7 @@ export function AppProvider({ children }) {
       setCacheAge(result.fetchedAt);
       setDataStatus(result.isFromCache ? 'cached' : 'live');
 
-      // Only notify about live data. Cached readings are old, so alerting
-      // on them would be telling the user about conditions that may have
-      // already passed.
+      // Notifications are only sent using current live data.
       if (!result.isFromCache) {
         await checkForRiskNotifications(result.data);
       }
@@ -279,8 +273,7 @@ export function AppProvider({ children }) {
         haze: result.data.haze.risk,
       };
     } else {
-      // No live data and nothing cached. Show honestly that the risk is
-      // unknown rather than defaulting to Low.
+      // Clearly show unavailable when no live or cached data can be loaded.
       setEnvironment({
         flood: {
           risk: 'Unavailable',
@@ -294,28 +287,30 @@ export function AppProvider({ children }) {
         },
         fetchedAt: null,
       });
+
       setCacheAge(null);
       setDataStatus('unavailable');
     }
   }, [checkForRiskNotifications]);
 
-  // Fetch once the saved data has loaded, so a cached result is available
-  // to fall back on if the network fails.
+  // Fetch the environmental information after saved data has loaded.
   useEffect(() => {
     if (!isLoading) {
       refreshEnvironment();
     }
-    // Deliberately not depending on refreshEnvironment - it changes
-    // whenever settings change, which would refetch on every toggle.
+
+    // Avoid fetching again every time a setting changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading]);
 
   // ---- Settings ----
 
+  // Updates only the settings that have been changed.
   const updateSettings = useCallback((changes) => {
     setSettings((current) => ({ ...current, ...changes }));
   }, []);
 
+  // Clears all saved progress and returns the app to its starting state.
   const resetAllData = useCallback(async () => {
     await clearAllData(Object.values(STORAGE_KEYS));
     setCompletedIds([]);
@@ -332,8 +327,7 @@ export function AppProvider({ children }) {
     refreshEnvironment();
   }, [refreshEnvironment]);
 
-  // Badges are worked out from the current state rather than stored, so
-  // they can never fall out of step with the checklist and quiz.
+  // Work out the badges from the user's current checklist and quiz progress.
   const earnedBadges = earnedBadgeIds({
     completedIds,
     quizAnswers,
@@ -341,6 +335,7 @@ export function AppProvider({ children }) {
     items: checklistItems,
   });
 
+  // Values and functions that can be used by the other screens.
   const value = {
     completedIds,
     quizAnswers,
@@ -367,12 +362,13 @@ export function AppProvider({ children }) {
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
 
-// Custom hook so screens can call useApp() instead of importing both
-// useContext and AppContext every time.
+// Makes it easier for screens to access the shared app data.
 export function useApp() {
   const context = useContext(AppContext);
+
   if (!context) {
     throw new Error('useApp must be used inside an AppProvider');
   }
+
   return context;
 }

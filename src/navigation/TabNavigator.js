@@ -10,8 +10,7 @@ import { colors } from '../theme/theme';
 
 const Tab = createBottomTabNavigator();
 
-// Mapping each route to its icon here keeps the screenOptions function
-// tidy instead of a long if/else chain.
+// Icons used for each tab in the bottom navigation.
 const ICONS = {
   Home: 'home',
   Prepare: 'checkbox',
@@ -23,7 +22,8 @@ export default function TabNavigator() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        headerShown: false, // each screen draws its own header
+        // Each screen uses its own header.
+        headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: {
@@ -36,8 +36,8 @@ export default function TabNavigator() {
         tabBarLabelStyle: { fontSize: 11 },
         tabBarIcon: ({ color, size, focused }) => {
           const name = ICONS[route.name];
-          // Outline when inactive, filled when active. Small touch, but it
-          // makes the selected tab much clearer.
+
+          // Use a filled icon for the selected tab.
           return (
             <Ionicons
               name={focused ? name : `${name}-outline`}
@@ -48,8 +48,7 @@ export default function TabNavigator() {
         },
       })}
     >
-      {/* Home and Prepare point at stacks so their detail screens can open
-          on top while keeping the tab bar visible. */}
+      {/* Main tabs shown at the bottom of the app. */}
       <Tab.Screen name="Home" component={HomeStack} />
       <Tab.Screen name="Prepare" component={PrepareStack} />
       <Tab.Screen name="Learn" component={LearnScreen} />

@@ -1,18 +1,11 @@
-// Risk classification. These are pure functions - they take a value in and
-// return a result without touching state or making network calls, which
-// makes them straightforward to unit test.
+// Functions used to classify flood and haze risk levels.
 
-// The most important rule in this file: bad or missing data must never come
-// back as "Low". Telling someone their flood risk is low when the app has no
-// idea is worse than telling them nothing at all.
-
-// PSI bands follow NEA's published ranges: 0-50 Good, 51-100 Moderate,
-// 101 and above Unhealthy.
+// Classify the PSI reading into a risk level.
 export function classifyPsi(psi) {
   if (psi === null || psi === undefined) return 'Unavailable';
   if (!Number.isFinite(psi)) return 'Unavailable';
-  // A negative PSI is not physically possible, so treat it as bad data
-  // rather than rounding it down to Low.
+
+  // Negative PSI values should be treated as invalid data.
   if (psi < 0) return 'Unavailable';
 
   if (psi >= 101) return 'High';
@@ -20,8 +13,7 @@ export function classifyPsi(psi) {
   return 'Low';
 }
 
-// Flood risk from the number of active PUB alerts. A null count means the
-// response could not be read, which is different from a genuine zero.
+// Classify flood risk based on the number of active alerts.
 export function classifyFloodAlertCount(count) {
   if (count === null || count === undefined) return 'Unavailable';
   if (!Number.isFinite(count)) return 'Unavailable';
@@ -32,11 +24,13 @@ export function classifyFloodAlertCount(count) {
   return 'Low';
 }
 
+// Create the text shown for the current PSI reading.
 export function describePsi(psi) {
   if (psi === null || psi === undefined) return 'PSI reading unavailable';
   return `Highest 24-hr PSI: ${psi}`;
 }
 
+// Create the text shown for current flood alerts.
 export function describeFloodAlerts(count) {
   if (count === null || count === undefined) {
     return 'Flood alert information unavailable';
@@ -45,21 +39,17 @@ export function describeFloodAlerts(count) {
   return `${count} active PUB flood alert${count > 1 ? 's' : ''}`;
 }
 
-// True only for the three real measured levels.
+// Check whether the risk is a known level.
 export function isKnownRisk(risk) {
   return risk === 'Low' || risk === 'Moderate' || risk === 'High';
 }
 
-// Guidance text only exists for the three real levels. When the risk is
-// unknown we show Low guidance as a sensible default, but the screen must
-// still label the risk itself as Unavailable so the user is never told
-// their risk is low.
+// Use Low guidance when the current risk is unavailable.
 export function guidanceLevelFor(risk) {
   return isKnownRisk(risk) ? risk : 'Low';
 }
 
-// Severity ordering, used to decide whether conditions have worsened since
-// the last check and a notification is worth sending.
+// Values used to compare the different risk levels.
 const RISK_SEVERITY = {
   Unavailable: -1,
   Low: 0,
@@ -67,11 +57,12 @@ const RISK_SEVERITY = {
   High: 2,
 };
 
+// Check whether the new risk is more serious than the previous risk.
 export function isMoreSevere(next, previous) {
   return RISK_SEVERITY[next] > RISK_SEVERITY[previous];
 }
 
-// A reading that represents "we genuinely do not know".
+// Create a result when the risk information is unavailable.
 export function unavailableReading(detail) {
   return { risk: 'Unavailable', detail, value: null };
 }

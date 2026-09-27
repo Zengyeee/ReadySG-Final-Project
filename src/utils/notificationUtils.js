@@ -1,19 +1,7 @@
 import { isMoreSevere } from './riskUtils';
 import { isSameLocalDay } from './dateUtils';
 
-// Decides whether a notification is worth sending, and what it should say.
-// Both are pure functions kept out of the service file, so the tests never
-// have to import expo-notifications - which prints warnings on load and
-// would need mocking in a Node environment.
-//
-// Three rules govern whether to notify, each preventing a specific
-// annoyance:
-//   1. Only notify when risk has actually got worse. Being told the risk
-//      dropped to Low is not urgent.
-//   2. Never notify about Low risk. There is nothing to act on.
-//   3. Only once per risk level per day. Without this, every refresh
-//      during a hazy afternoon would fire another notification, and the
-//      user would switch them off entirely.
+// Checks whether the user should receive a risk notification.
 export function shouldNotify({
   nextRisk,
   previousRisk,
@@ -24,18 +12,18 @@ export function shouldNotify({
 }) {
   if (!enabled) return false;
 
-  // Only Moderate and High are worth interrupting someone for.
+  // Only send notifications for Moderate or High risk.
   if (nextRisk !== 'Moderate' && nextRisk !== 'High') return false;
 
-  // Nothing to report if conditions have not worsened.
+  // Only notify when the risk becomes more serious.
   if (!isMoreSevere(nextRisk, previousRisk)) return false;
 
   const record = lastNotified?.[type];
 
-  // Never notified about this before, so send it.
+  // Send the notification if there is no previous record.
   if (!record) return true;
 
-  // Already told them about this exact level today.
+  // Avoid sending the same risk notification many times in one day.
   if (record.risk === nextRisk && isSameLocalDay(record.at, now)) {
     return false;
   }
@@ -43,8 +31,7 @@ export function shouldNotify({
   return true;
 }
 
-// Records that a notification was sent, so the daily rule has something to
-// check against next time.
+// Store the last notification that was sent.
 export function recordNotification(
   lastNotified,
   type,
@@ -57,9 +44,7 @@ export function recordNotification(
   };
 }
 
-// The message text. Written to be actionable rather than alarming - a
-// notification that only says "risk is high" leaves the user with nothing
-// to do about it.
+// Create the notification message based on the risk type and level.
 export function buildRiskMessage(type, risk) {
   const label = type === 'flood' ? 'Flood' : 'Haze';
 

@@ -9,7 +9,7 @@ import {
 
 describe('toDateString', () => {
   test('formats a date as YYYY-MM-DD', () => {
-    const date = new Date(2026, 8, 4); // month is zero-based, so 8 is September
+    const date = new Date(2026, 8, 4); // Months start from 0, so 8 is September.
     expect(toDateString(date)).toBe('2026-09-04');
   });
 
@@ -18,8 +18,7 @@ describe('toDateString', () => {
     expect(toDateString(date)).toBe('2026-01-05');
   });
 
-  // This is the bug that toISOString would introduce in Singapore: local
-  // midnight converted to UTC lands on the previous day.
+  // Make sure the local date is used instead of the UTC date.
   test('uses the local date rather than UTC', () => {
     const localMidnight = new Date(2026, 8, 4, 0, 0, 0);
     expect(toDateString(localMidnight)).toBe('2026-09-04');
@@ -50,6 +49,7 @@ describe('toTimeString', () => {
 });
 
 describe('describeAge', () => {
+  // Check that timestamps are displayed in an easy to understand format.
   test('a fresh timestamp is just now', () =>
     expect(describeAge(new Date().toISOString())).toBe('just now'));
 
@@ -88,6 +88,7 @@ describe('formatUpdatedAt', () => {
 });
 
 describe('isSameLocalDay', () => {
+  // Used to check whether two timestamps belong to the same local day.
   test('two times on the same day match', () => {
     const morning = new Date(2026, 8, 4, 8, 0).toISOString();
     const evening = new Date(2026, 8, 4, 20, 0).toISOString();
